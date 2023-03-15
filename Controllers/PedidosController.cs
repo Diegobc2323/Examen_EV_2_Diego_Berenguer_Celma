@@ -32,11 +32,41 @@ namespace Examen_EV_2_Diego_Berenguer_Celma.Controllers
         }
 
         // GET: PedidosController/Create
-        public ActionResult Create(int proveedor=1)
+        public ActionResult Create(int id=1)
         {
-            ViewBag.proveedorID = new SelectList(contexto.Proveedores, "ID", "nomProveedor");
+            ViewBag.proveedorID = new SelectList(contexto.Proveedores, "ID", "nomProveedor", id);
 
-            ViewBag.pedidosProductos = new MultiSelectList(contexto.Productos, "ID", "nomProducto");
+            var lista = contexto.ProvProd.Where(prov => prov.proveedorID == id).ToList();
+            var productos = contexto.Productos.ToList();
+            var aEliminar = new List<ProductosModel>();
+
+            foreach (ProductosModel producto in productos)
+            {
+               
+                bool esta = false;
+                foreach (ProvProdModel item in lista)
+                {
+                    if (item.productoID == producto.ID && item.proveedorID==id)
+                    {
+                        esta = true;
+                    }
+                }
+
+                if (!esta)
+                {
+                    aEliminar.Add(producto);
+                }
+            }
+
+            
+            foreach (var item in aEliminar)
+            {
+                productos.Remove(item);
+            }
+
+            
+
+            ViewBag.pedidosProductos = new MultiSelectList(productos, "ID", "nomProducto");
             return View();
         }
 
